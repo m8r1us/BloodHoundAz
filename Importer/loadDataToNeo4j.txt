@@ -1,0 +1,561 @@
+// AZ Tenant
+CALL apoc.load.json("file://aztenant.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzTenant {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+                n.name = fromJson.displayname,
+                n.tenantId = fromJson.tenantId,
+                n.assignedPlans = fromJson.assignedPlans;
+                
+// AZ Management Groups
+CALL apoc.load.json("file://azArmMgmtGroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzMgmtGroup {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.name,
+              n.tenantId = fromJson.tenantId,
+              n.name = fromJson.displayname;
+
+// AZ Subscription
+CALL apoc.load.json("file://azsubscriptions.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (s:AzSubscription {subscriptionId: fromJson.subscriptionId})
+ON CREATE SET s.displayname = fromJson.displayname,
+              s.objectid = fromJson.objectid,
+              s.name = fromJson.displayname,
+              s.state = fromJson.state,
+              s.tenantId = fromJson.tenantId,
+              s.homeTenantId = fromJson.homeTenantId;
+
+// Mgmt Group and Subscription Relationship
+CALL apoc.load.json("file://azArmMgmtGroupsChilds.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzMgmtGroup {objectid:fromJson.parentId})
+match (b {objectid:fromJson.childId})
+CALL apoc.merge.relationship(a,"Contains",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// AZ Resource Groups
+CALL apoc.load.json("file://azresourcegroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzResourceGroup {objectid: fromJson.resourceGroupId})
+ON CREATE SET n.displayname = fromJson.displayname,
+              n.name = fromJson.displayname
+WITH n,fromJson
+match (a:AzSubscription {subscriptionId:fromJson.subscriptionId})
+CALL apoc.merge.relationship(a,"Contains",{},{},n) yield rel
+return count(*) as relationships;
+
+// AZ Users
+CALL apoc.load.json("file://azusers.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzUser {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+              n.name = fromJson.displayname,
+              n.userPrincipalName = fromJson.userPrincipalName,
+              n.email = fromJson.email,
+              n.tenantId = fromJson.tenantId,
+              n.enabled = fromJson.enabled,
+              n.immutableId = fromJson.immutableId,
+              n.jobTitle = fromJson.jobTitle,
+              n.mobile = fromJson.mobile,
+              n.userType = fromJson.userType,
+              n.onPremisesSecurityIdentifier = fromJson.onPremisesSecurityIdentifier,
+              n.proxyAddresses = fromJson.proxyAddresses;
+
+// AZ Groups
+CALL apoc.load.json("file://azgroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzGroup {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayName,
+              n.name = fromJson.displayName,
+              n.onPremisesSecurityIdentifier = fromJson.onPremisesSecurityIdentifier,
+              n.tenantId = fromJson.tenantId,
+              n.email = fromJson.email,
+              n.groupType = fromJson.groupType,
+              n.securityIdentifier = fromJson.securityIdentifier,
+              n.description = fromJson.description,
+              n.proxyAddresses = fromJson.proxyAddresses,
+              n.createdDateTime = fromJson.createdDateTime,
+              n.onPremisesDomainName = fromJson.onPremisesDomainName,
+	      n.mailNickname=fromJson.MailNickname;
+
+// AZ AzRoleGroup
+CALL apoc.load.json("file://azrolegroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzRoleGroup {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayName,
+              n.name = fromJson.displayName,
+              n.tenantId = fromJson.tenantId,
+              n.email = fromJson.email,
+              n.groupType = fromJson.groupType,
+              n.securityIdentifier = fromJson.securityIdentifier,
+              n.description = fromJson.description,
+              n.proxyAddresses = fromJson.proxyAddresses,
+              n.createdDateTime = fromJson.createdDateTime,
+	      n.mailNickname=fromJson.MailNickname;
+
+// AZ Devices
+CALL apoc.load.json("file://azdevices.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzDevice {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+              n.name = fromJson.displayname,
+              n.deviceId = fromJson.deviceId,
+              n.deviceOs = fromJson.deviceOs,
+              n.DeviceOsVersion = fromJson.DeviceOsVersion,
+              n.enabled = fromJson.enabled,
+              n.lastLogonTimeStamp = fromJson.lastLogonTimeStamp,
+              n.profileType = fromJson.profileType,
+              n.trustType = fromJson.trustType
+WITH n,fromJson
+match (a {objectid:fromJson.ownerID})
+CALL apoc.merge.relationship(a,"Owns",{},{},n) yield rel
+return count(*) as relationships;
+
+// AZ VMs
+// Workaround to counter the case irregularities from MS with Case-insensitive regular expressions
+// MS on VM result: /subscriptions/b1f16657-dd6b-4dc6-ac0a-8de1a884d403/resourceGroups/01-ASSESSMENT/providers/Microsoft.Compute/virtualMachines/Win10
+// MS on RG result: /subscriptions/b1f16657-dd6b-4dc6-ac0a-8de1a884d403/resourceGroups/01-Assessment
+// Task: Add all objectid as lower case
+CALL apoc.load.json("file://azvms.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzVm {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+                n.name = fromJson.displayname,
+                n.vmId = fromJson.vmId,
+                n.licenseType = fromJson.licenseType,
+                n.powerState = fromJson.powerState
+WITH n,fromJson
+match (a:AzResourceGroup) where a.objectid =~ '(?i)' + fromJson.resourceGroupId
+CALL apoc.merge.relationship(a,"Contains",{},{},n) yield rel
+return count(*) as relationships;
+
+// Key Vault
+CALL apoc.load.json("file://azkeyvaults.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzKeyVault {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+                n.name = fromJson.displayname
+WITH n,fromJson
+match (a:AzResourceGroup {objectid:fromJson.resourceGroupId})
+CALL apoc.merge.relationship(a,"Contains",{},{},n) yield rel
+return count(*) as relationships;
+
+// Group Memberships
+CALL apoc.load.json("file://azgroupmembers.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.MemberID})
+match (b {objectid:fromJson.GroupID})
+CALL apoc.merge.relationship(a,"MemberOf",{},{},b) yield rel
+return count(*) as relationships;
+
+// Group Owners
+CALL apoc.load.json("file://azgroupowners.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.OwnerID})
+match (b {objectid:fromJson.GroupID})
+CALL apoc.merge.relationship(a,"Owns",{},{},b) yield rel
+return count(*) as relationships;
+
+
+// Create Azure AD roles
+// fix later n.description = fromJson.licenseType
+CALL apoc.load.json("file://azrolesAndAssignments.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzAdRole {objectid: fromJson.roleojectid})
+ON CREATE SET n.displayname = fromJson.roleDisplayName,
+                n.name = fromJson.roleDisplayName,
+                n.roleTemplateId = fromJson.roleTemplateId;
+                
+// Azure AD Role relationships
+// fix later n.description = fromJson.licenseType
+// match (c {objectid:fromJson.tenantId})
+// CALL apoc.merge.relationship(b,"ScopedTo",{},{},c) yield rel as relx
+CALL apoc.load.json("file://azrolesAndAssignments.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.member})
+match (b {objectid:fromJson.roleojectid})
+CALL apoc.merge.relationship(a,fromJson.assignmentState,{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Azure AD Role Groups relationships
+CALL apoc.load.json("file://azrolegroupsassignments.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.member})
+match (b:AzRoleGroup {objectid:fromJson.resourceId})
+CALL apoc.merge.relationship(a,fromJson.assignmentState,{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// AZ Service Principals
+CALL apoc.load.json("file://azServicePrincipals.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzServicePrincipal {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+                n.name = fromJson.displayname,
+                n.appId = fromJson.appId,
+                n.objectType = fromJson.objectType,
+                n.enabled = fromJson.enabled,
+                n.appDisplayName = fromJson.appDisplayName,
+                n.appOwnerTenantId = fromJson.appOwnerTenantId,
+                n.publisherName = fromJson.publisherName,
+                n.servicePrincipalNames = fromJson.servicePrincipalNames,
+                n.servicePrincipalType = fromJson.servicePrincipalType,
+                n.keyCredentials = fromJson.keyCredentials,
+                n.passwordCredentials = fromJson.passwordCredentials;
+
+// AZ Service Principals Owner
+CALL apoc.load.json("file://azSpOwners.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.OwnerID})
+match (b:AzServicePrincipal{objectid:fromJson.objectid})
+CALL apoc.merge.relationship(a,"Owns",{},{},b) yield rel
+return count(*) as relationships;
+
+// AZ Applications
+CALL apoc.load.json("file://azApplication.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzApplication {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.displayname,
+                n.name = fromJson.displayname,
+                n.appId = fromJson.appId,
+                n.objectType = fromJson.objectType,
+                n.enabled = fromJson.enabled,
+                n.allowGuestsSignIn = fromJson.allowGuestsSignIn,
+                n.allowPassthroughUsers = fromJson.allowPassthroughUsers,
+                n.availableToOtherTenants = fromJson.availableToOtherTenants,
+                n.homepage = fromJson.homepage,
+                n.wwwHomepage = fromJson.wwwHomepage,
+                n.replyUrls = fromJson.replyUrls,
+                n.isDisabled = fromJson.isDisabled,
+                n.publisherDomain = fromJson.publisherDomain,
+                n.oauth2AllowImplicitFlow = fromJson.oauth2AllowImplicitFlow,
+                n.createDateTime = fromJson.createDateTime,
+                n.description = fromJson.description,
+                n.passwordCredentials = fromJson.passwordCredentials;
+
+// AZ Service Principals Owner
+CALL apoc.load.json("file://azApplicationOwners.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.OwnerID})
+match (b:AzApplication {objectid:fromJson.objectid})
+CALL apoc.merge.relationship(a,"Owns",{},{},b) yield rel
+return count(*) as relationships;
+
+// AZ Service Principals <-> Az Applications
+MATCH (a:AzApplication),(s:AzServicePrincipal)
+WHERE EXISTS (a.appId) AND EXISTS (s.appId) AND a.appId=s.appId
+CALL apoc.merge.relationship(a,"RunsAs",{},{},s) yield rel
+return count(*) as relationships;
+
+// AZ Service Principal App Role Permissions
+//match (c {objectid:fromJson.tenantId})
+//CALL apoc.merge.relationship(b,"ScopedTo",{},{},c) YIELD rel as rely
+CALL apoc.load.json("file://azSpAppRolePermissions.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzServicePrincipal {objectid:fromJson.servicePrincipalObjectId})
+match (b {objectid:fromJson.resourceId})
+CALL apoc.merge.relationship(a,"app"+fromJson.appRoleValue,{displayname:fromJson.appDisplayname, appRoleId:fromJson.appRoleId,description:fromJson.appDescription},{},b) YIELD rel as relx
+return count(*) as relationships;
+
+// AZ Service Principal App Role Assignments (RoleAssignment)
+//CALL apoc.load.json("file://azSpAppRoleAssignments.json") 
+//YIELD value
+//UNWIND value.data AS fromJson
+//match (a {objectid:fromJson.principalId})
+//match (b:AzApplication {appId:fromJson.appId})
+//CALL apoc.merge.relationship(a,"CanAccess",{},{},b) yield rel
+//return count(*) as relationships;
+
+
+// AZ Service Principal App Role Assignments (NoRoleAssignment)
+//CALL apoc.load.json("file://azSpAppRoleAssignmentsEveryone.json") 
+//YIELD value
+//UNWIND value.data AS fromJson
+//match (a:AzUser)
+//match (b:AzApplication {appId:fromJson.appId})
+//CALL apoc.merge.relationship(a,"CanAccess",{},{},b) yield rel
+//return count(*) as relationships;
+
+// OAuth 2.0 Permission Grants
+CALL apoc.load.json("file://azSpOAuth2PermissionGrants.json") 
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzServicePrincipal {objectid:fromJson.clientId})
+match (b {objectid:fromJson.principalId})
+CALL apoc.merge.relationship(a,"dlg"+fromJson.oAuth2scope,{displayname:fromJson.oAuth2UserConsentDisplayName},{description:fromJson.oAuth2UserConsentDescription},b) yield rel
+return count(*) as relationships;
+
+// OAuth 2.0 Permission Grants (Everyone)
+CALL apoc.load.json("file://azSpOAuth2PermissionGrantsEveryone.json") 
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzServicePrincipal {objectid:fromJson.clientId})
+match (b:AzUser)
+CALL apoc.merge.relationship(a,"dlg"+fromJson.oAuth2scope,{displayname:fromJson.oAuth2UserConsentDisplayName},{description:fromJson.oAuth2UserConsentDescription},b) yield rel
+return count(*) as relationships;
+
+// Azure DevOps Orgs
+CALL apoc.load.json("file://azDeVOpsOrgs.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzDevOpsOrg {objectid: fromJson.accountId})
+ON CREATE SET n.displayname = fromJson.accountName,
+                n.name = fromJson.accountName,
+                n.accountUri = fromJson.accountUri;
+
+// Azure DevOps Projects
+CALL apoc.load.json("file://azDeVOpsProjects.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzDevOpsPrj {objectid: fromJson.projectid})
+ON CREATE SET n.displayname = fromJson.name,
+                n.name = fromJson.name,
+                n.visibility = fromJson.visibility
+WITH n,fromJson
+match (a:AzDevOpsOrg {objectid:fromJson.organizationId})
+CALL apoc.merge.relationship(a,"Contains",{},{},n) yield rel
+return count(*) as relationships;
+
+// Azure DevOps Users
+CALL apoc.load.json("file://azDeVOpsUsers.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzDevOpsUser {objectid: fromJson.descriptor})
+ON CREATE SET n.displayname = fromJson.displayName,
+                n.name = fromJson.displayName,
+                n.principalName = fromJson.principalName,
+                n.mail = fromJson.mailAddress;
+//WITH n,fromJson
+//match (a:AzDevOpsOrg {objectid:fromJson.accountId})
+//CALL apoc.create.relationship(n,"ScopedTo",{},a) yield rel
+//return count(*) as relationships;
+
+// Azure AD to DevOps User relationships
+CALL apoc.load.json("file://azDeVOpsUsers.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzUser {objectid:fromJson.originId})
+match (b:AzDevOpsUser {objectid:fromJson.descriptor})
+CALL apoc.merge.relationship(a,"SyncsTo",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Azure DevOps Groups
+CALL apoc.load.json("file://azDeVOpsGroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzDevOpsGroup {objectid: fromJson.descriptor})
+ON CREATE SET n.displayname = fromJson.displayName,
+                n.name = fromJson.displayName,
+                n.description = fromJson.description,
+                n.principalName = fromJson.principalName;
+
+// Azure DevOps Groups Relationship to Project or Org 
+CALL apoc.load.json("file://azDeVOpsGroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzDevOpsGroup {objectid:fromJson.descriptor})
+match (b {objectid:fromJson.domainId})
+CALL apoc.merge.relationship(a,"AssignedTo",{},{},b) yield rel
+return count(*) as relationships;
+
+// Azure DevOps Groups relationships
+CALL apoc.load.json("file://azDeVOpsMemberships.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.memberDescriptor})
+match (b:AzDevOpsGroup {objectid:fromJson.containerDescriptor})
+CALL apoc.merge.relationship(a,"MemberOf",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Azure AD to DevOps Groups relationships
+CALL apoc.load.json("file://azDevOpsGroups.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.originId})
+match (b:AzDevOpsGroup {objectid:fromJson.descriptor})
+CALL apoc.merge.relationship(a,"SyncsTo",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Azure AD to DevOps Service Principal Relationships
+CALL apoc.load.json("file://azDevOpsSpns.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzDevOpsPrj {objectid:fromJson.projectId})
+match (b:AzServicePrincipal {objectid:fromJson.spnObjectId})
+CALL apoc.merge.relationship(a,"RunsAs",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Azure ARM Roles
+CALL apoc.load.json("file://azArmRoles.json")
+YIELD value
+UNWIND value.data AS fromJson
+MERGE (n:AzArmRole {objectid: fromJson.objectid})
+ON CREATE SET n.displayname = fromJson.roleDefinitionName,
+              n.roleDefinitionId = fromJson.roleDefinitionId,
+              n.name = fromJson.roleDefinitionName
+WITH n,fromJson
+match (a {objectid:fromJson.scopeId})
+CALL apoc.merge.relationship(n,"AssignedTo",{},{},a) yield rel
+return count(*) as relationships;
+
+// Azure ARM Role Assignments
+CALL apoc.load.json("file://azArmRoleAssignments.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a {objectid:fromJson.principalId})
+match (b:AzArmRole {objectid:fromJson.roleId})
+CALL apoc.merge.relationship(a,"PermanentTo",{roleAssignmentId:fromJson.roleAssignmentId},{},b) yield rel as rely
+return count(*) as relationships;
+
+// AzureAD Role Relationships Reset Passwort to every AzUser, AzServicePrincipal and AzApplication object
+// Global Admin: 62e90394-69f5-4237-9190-012177145e10 
+// Privileged Auth Admin: 7be44c8a-adaf-4e2a-84d6-ab2649e08a13
+// Reference: https://docs.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#password-reset-permissions
+match (a:AzAdRole) where a.objectid="62e90394-69f5-4237-9190-012177145e10" or a.objectid="7be44c8a-adaf-4e2a-84d6-ab2649e08a13"
+match (b:AzUser) where b.userType <> "Guest"
+CALL apoc.merge.relationship(a,"ResetPassword",{},{},b) yield rel as relb
+return count(*) as relationships;
+
+match (a:AzAdRole) where a.objectid="62e90394-69f5-4237-9190-012177145e10" or a.objectid="7be44c8a-adaf-4e2a-84d6-ab2649e08a13"
+match (c:AzServicePrincipal)
+CALL apoc.merge.relationship(a,"ResetPassword",{},{},c) yield rel as relc
+return count(*) as relationships;
+
+match (a:AzAdRole) where a.objectid="62e90394-69f5-4237-9190-012177145e10" or a.objectid="7be44c8a-adaf-4e2a-84d6-ab2649e08a13"
+match (d:AzApplication)
+CALL apoc.merge.relationship(a,"ResetPassword",{},{},d) yield rel as reld
+return count(*) as relationships;
+
+// Global Admin -> ARM
+// Global Admin: 62e90394-69f5-4237-9190-012177145e10 
+CALL apoc.load.json("file://aztenant.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzAdRole {objectid:"62e90394-69f5-4237-9190-012177145e10"})
+match (b:AzMgmtGroup {objectid:"/providers/Microsoft.Management/managementGroups/" + fromJson.tenantId})
+CALL apoc.merge.relationship(a,"CanManage",{description:"Global Administrators can manage access to all Azure subscriptions and management groups in this tenant"},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Global Admin -> Tenant
+// Global Admin: 62e90394-69f5-4237-9190-012177145e10 
+CALL apoc.load.json("file://aztenant.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzAdRole {objectid:"62e90394-69f5-4237-9190-012177145e10"})
+match (b:AzTenant {objectid: fromJson.tenantId})
+CALL apoc.merge.relationship(a,"CanManage",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// AzureAD Role Relationships
+// Without Global Admin and Privileged Auth Admin
+// TASK: Create the edges between the users not the role
+CALL apoc.load.json("file://azRolesRelationships.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzAdRole {objectid:fromJson.roleIdSubject})
+match (b:AzAdRole {objectid:fromJson.roleIdObject})
+CALL apoc.merge.relationship(a,"ResetPassword",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Applications / Service Principals which can grant them self any Azure AD Role
+// 9e3f62cf-ca93-4989-b6ce-bf83c28f9fe8 # RoleManagement.ReadWrite.Directory -> directly promote yourself to GA
+// 06b708a9-e830-4db3-a914-8e69da51d44f # AppRoleAssignment.ReadWrite.All -> grant yourself the RoleManagement.ReadWrite.Directory role, then promote to GA
+match (a:AzServicePrincipal)-[r]->(b:AzServicePrincipal) where b<>a and (r.appRoleId = '9e3f62cf-ca93-4989-b6ce-bf83c28f9fe8' or r.appRoleId = '06b708a9-e830-4db3-a914-8e69da51d44f') 
+WITH a
+match (b:AzAdRole)
+CALL apoc.merge.relationship(a,"CanGrant",{description:"ServicePrincipal was granted RoleManagement.ReadWrite.Directory or AppRoleAssignment.ReadWrite.All"},{},b) yield rel as rely
+return count(*) as relationships;
+
+// AzureAD Roles with PW Reset rights (Non GA or Priv Auth Adm)
+// User Administrator: fe930be7-5e62-47db-91af-98c3a49a38b1
+// Password Administrator: 966707d0-3269-4727-9be2-8c3a10f19b9d
+// Helpdesk Administrator: 729827e3-9c14-49f7-bb1b-9608f156bbb8
+// Authentication Administrator: c4e39bd9-1100-46d3-8c65-fb160da0071f
+CALL apoc.load.json("file://azRolesRelationships.json")
+YIELD value
+UNWIND value.data AS fromJson
+match (a:AzAdRole) where a.objectid="fe930be7-5e62-47db-91af-98c3a49a38b1" or a.objectid="966707d0-3269-4727-9be2-8c3a10f19b9d" or a.objectid="729827e3-9c14-49f7-bb1b-9608f156bbb8" or a.objectid="c4e39bd9-1100-46d3-8c65-fb160da0071f"  
+Match (b:AzUser) where NOT EXISTS ((b:AzUser)-[:EligibleTo|:PermanentTo]-(:AzAdRole)) and b.userType <> "Guest" 
+With a,b 
+Match (b) where NOT EXISTS ((b:AzUser)-[:MemberOf]-(:AzRoleGroup))
+CALL apoc.merge.relationship(a,"ResetPassword",{},{},b) yield rel as rely
+return count(*) as relationships;
+
+// ApplicationAdmins can manage all apps / Sp
+// Application Administrator: 9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3
+match (a:AzAdRole) where a.objectid="9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"
+match (b:AzApplication)
+match (c:AzServicePrincipal)
+CALL apoc.merge.relationship(a,"CanManage",{description:"Can create and manage all aspects of app registrations and enterprise apps."},{},b) yield rel as rely
+CALL apoc.merge.relationship(a,"CanManage",{description:"Can create and manage all aspects of app registrations and enterprise apps."},{},c) yield rel as relx
+return count(*) as relationships;
+
+// Cloud Application Admins can manage all apps / Sp
+// Cloud Application Administrator: 158c047a-c907-4556-b7ef-446551a6b5f7
+match (a:AzAdRole) where a.objectid="158c047a-c907-4556-b7ef-446551a6b5f7" 
+match (b:AzApplication)
+match (c:AzServicePrincipal)
+CALL apoc.merge.relationship(a,"CanManage",{description:"Can create and manage all aspects of app registrations and enterprise apps except App Proxy."},{},b) yield rel as rely
+CALL apoc.merge.relationship(a,"CanManage",{description:"Can create and manage all aspects of app registrations and enterprise apps except App Proxy."},{},c) yield rel as relx
+return count(*) as relationships;
+
+// Groups Administrator can manage all Groups
+// Groups Administrator: fdd7a751-b60b-444a-984c-02652fe8fa1c
+match (a:AzAdRole) where a.objectid="fdd7a751-b60b-444a-984c-02652fe8fa1c" 
+match (b:AzGroup) where b.onPremisesSecurityIdentifier IS NULL
+CALL apoc.merge.relationship(a,"CanManage",{description:"Members of this role can create/manage groups, create/manage groups settings like naming and expiration policies, and view groups activity and audit reports."},{},b) yield rel as rely
+return count(*) as relationships;
+
+
+// Azure DevOps Administrator can manage Azure DevOps organization policy and settings.
+// DevOps Administrator: e3973bdf-4987-49ae-837a-ba8e231c7286
+match (a:AzAdRole) where a.objectid="e3973bdf-4987-49ae-837a-ba8e231c7286" 
+match (b:AzDevOpsOrg)
+CALL apoc.merge.relationship(a,"CanManage",{description:"Azure DevOps Administrator can manage Azure DevOps organization policy and settings."},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Privileged Role Administrator can manage roles
+// Privileged Role Administrator: e8611ab8-c189-46e8-94e1-60213ab1f814
+match (a:AzAdRole) where a.objectid="e8611ab8-c189-46e8-94e1-60213ab1f814" 
+match (b:AzAdRole)
+CALL apoc.merge.relationship(a,"CanManage",{description:"Can manage role assignments in Azure AD, and all aspects of Privileged Identity Management."},{},b) yield rel as rely
+return count(*) as relationships;
+
+// Tenant Contains everything
+//CALL apoc.load.json("file://aztenant.json")
+//YIELD value
+//UNWIND value.data AS fromJson
+//match (a:AzTenant {objectid:fromJson.tenantId})
+//match (b)
+//CALL apoc.merge.relationship(a,"Contains",{},{},b) yield rel as rely
+//return count(*) as relationships
+
+
+// Set Highvalue targets
+MATCH (n {objectid: "e8611ab8-c189-46e8-94e1-60213ab1f814"}) SET n.highvalue="true"; // Privileged Role Administrator
+MATCH (n {objectid: "62e90394-69f5-4237-9190-012177145e10"}) SET n.highvalue="true"; // Global Admin
+MATCH (n {objectid: "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3"}) SET n.highvalue="true"; // Application Administrator
+MATCH (n {objectid: "7be44c8a-adaf-4e2a-84d6-ab2649e08a13"}) SET n.highvalue="true"; // Privileged Auth Admin
+MATCH (n {roleDefinitionId: "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}) SET n.highvalue="true"; // ARM Owner
+MATCH (n {roleDefinitionId: "b24988ac-6180-42a0-ab88-20f7382dd24c"}) SET n.highvalue="true"; // ARM Contributer

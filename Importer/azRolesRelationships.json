@@ -1,0 +1,191 @@
+{
+	"meta": {
+		"count": 26,
+		"type": "azRolesRelationships",
+		"version": 4
+	},
+	"data": [
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Helpdesk Administrator",
+            "roleIdObject": "729827e3-9c14-49f7-bb1b-9608f156bbb8"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Directory Readers",
+            "roleIdObject": "88d8e3e3-8f55-4a1e-953a-9b9898b8876b"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Guest Inviter",
+            "roleIdObject": "95e79109-95c0-4d8e-aee3-d01accf2d47b"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Groups Administrator",
+            "roleIdObject": "fdd7a751-b60b-444a-984c-02652fe8fa1c"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Message Center Reader",
+            "roleIdObject": "790c1fb9-7f7d-4f88-86a1-ef1f95c05c1b"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Password Administrator",
+            "roleIdObject": "966707d0-3269-4727-9be2-8c3a10f19b9d"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Reports Reader",
+            "roleIdObject": "4a5d8f65-41da-4de4-8968-e035b65339cf"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "User Administrator",
+            "roleIdObject": "fe930be7-5e62-47db-91af-98c3a49a38b1"
+        },
+        {
+            "roleDisplayNameSubject": "User Administrator",
+            "roleIdSubject": "fe930be7-5e62-47db-91af-98c3a49a38b1",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Usage Summary Reports Reader",
+            "roleIdObject": "75934031-6c7e-415a-99d7-48dbd49e875e"
+        },
+        {
+            "roleDisplayNameSubject": "Password Administrator",
+            "roleIdSubject": "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Directory Readers",
+            "roleIdObject": "88d8e3e3-8f55-4a1e-953a-9b9898b8876b"
+        },
+        {
+            "roleDisplayNameSubject": "Password Administrator",
+            "roleIdSubject": "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Guest Inviter",
+            "roleIdObject": "95e79109-95c0-4d8e-aee3-d01accf2d47b"
+        },
+        {
+            "roleDisplayNameSubject": "Password Administrator",
+            "roleIdSubject": "966707d0-3269-4727-9be2-8c3a10f19b9d",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Password Administrator",
+            "roleIdObject": "966707d0-3269-4727-9be2-8c3a10f19b9d"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Directory Readers",
+            "roleIdObject": "88d8e3e3-8f55-4a1e-953a-9b9898b8876b"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Guest Inviter",
+            "roleIdObject": "95e79109-95c0-4d8e-aee3-d01accf2d47b"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Helpdesk Administrator",
+            "roleIdObject": "729827e3-9c14-49f7-bb1b-9608f156bbb8"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Message Center Reader",
+            "roleIdObject": "790c1fb9-7f7d-4f88-86a1-ef1f95c05c1b"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Password Administrator",
+            "roleIdObject": "966707d0-3269-4727-9be2-8c3a10f19b9d"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Reports Reader",
+            "roleIdObject": "4a5d8f65-41da-4de4-8968-e035b65339cf"
+        },
+        {
+            "roleDisplayNameSubject": "Helpdesk Administrator",
+            "roleIdSubject": "729827e3-9c14-49f7-bb1b-9608f156bbb8",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Usage Summary Reports Reader",
+            "roleIdObject": "75934031-6c7e-415a-99d7-48dbd49e875e"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Authentication Administrator",
+            "roleIdObject": "c4e39bd9-1100-46d3-8c65-fb160da0071f"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Directory Readers",
+            "roleIdObject": "88d8e3e3-8f55-4a1e-953a-9b9898b8876b"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Guest Inviter",
+            "roleIdObject": "95e79109-95c0-4d8e-aee3-d01accf2d47b"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Message Center Reader",
+            "roleIdObject": "790c1fb9-7f7d-4f88-86a1-ef1f95c05c1b"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Password Administrator",
+            "roleIdObject": "966707d0-3269-4727-9be2-8c3a10f19b9d"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Reports Reader",
+            "roleIdObject": "4a5d8f65-41da-4de4-8968-e035b65339cf"
+        },
+        {
+            "roleDisplayNameSubject": "Authentication Administrator",
+            "roleIdSubject": "c4e39bd9-1100-46d3-8c65-fb160da0071f",
+            "Edge": "ResetPassword",
+            "roleDisplayNameObject": "Usage Summary Reports Reader",
+            "roleIdObject": "75934031-6c7e-415a-99d7-48dbd49e875e"
+        }
+	]
+}
