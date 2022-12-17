@@ -21,7 +21,7 @@ For the best result the user should have the following rights:
 
 ## Import
 
-[Import Readme](Importer/import-readme.md.md)
+[Import Readme](https://github.com/m8r1us/BloodHoundAz/blob/main/Importer/readme.md)
 
 ## BloodHound GUI
 
